@@ -9,7 +9,7 @@
             { @"/6/assets/images/common/controller/key-d.png", "↓" },
             { @"/6/assets/images/common/controller/key-dc.png", "↓蓄力" },
             { @"/6/assets/images/common/controller/key-l.png", "←" },
-            { @"/6/assets/images/common/controller/key-lc.png", "←c蓄力" },
+            { @"/6/assets/images/common/controller/key-lc.png", "←蓄力" },
             { @"/6/assets/images/common/controller/key-r.png", "→" },
             { @"/6/assets/images/common/controller/key-ul.png", "↖" },
             { @"/6/assets/images/common/controller/key-ur.png", "↗" },

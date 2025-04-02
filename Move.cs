@@ -31,6 +31,9 @@ namespace StreetFighter6FrameData
             var 经典指令 = link.SelectSingleNode(".//p[@class='frame_classic___gpLR']");
             var 发生 = link.SelectSingleNode(".//td[@class='frame_startup_frame__Dc2Ph']");
             var 持续帧 = link.SelectSingleNode(".//td[@class='frame_active_frame__6Sovc']");
+            var 部分持续帧 = 持续帧.SelectSingleNode(".//div[@class='frame_inner__Qf7xV']");
+            var 总持续帧 = 持续帧.SelectSingleNode(".//label");
+            bool 有无部分持续帧 = 部分持续帧 is null;
             var 后摇 = link.SelectSingleNode(".//td[@class='frame_recovery_frame__CznJj']");
             var 命中 = link.SelectSingleNode(".//td[@class='frame_hit_frame__K7xOz undefined']");
             var 被防 = link.SelectSingleNode(".//td[@class='frame_block_frame__SfHiW undefined']");
@@ -42,15 +45,25 @@ namespace StreetFighter6FrameData
             var 反击康斗气槽减少量 = link.SelectSingleNode(".//td[@class='frame_drive_gauge_lose_punish__mFrmM']");
             var 大招增加量 = link.SelectSingleNode(".//td[@class='frame_sa_gauge_gain__oGcqw']");
             var 属性 = link.SelectSingleNode(".//td[@class='frame_attribute__1vABD']");
-            var 备注 = link.SelectSingleNode(".//td[@class='frame_note__hfwBr']");
+            var 备注td = link.SelectSingleNode(".//td[@class='frame_note__hfwBr']");
+            string 备注 = "";
+            if (备注td.SelectNodes(".//li") != null)
+                foreach (var 备注li in 备注td.SelectNodes(".//li"))
+                {
+                    备注 += 备注li.InnerText.Replace("\r\n", "").Replace(" ", "") + "\n";
+                }
+            else
+            {
+                备注 = 备注td.InnerText.Replace("\r\n", "").Replace(" ", "");
+            }
             return new Move()
             {
                 招式名 = (招式名?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
                 别名 = [],
-                经典指令 = ReplaceImagePathsInHtml(经典指令!.InnerHtml.Replace("弱", "").Replace("中", "").Replace("強", "")).Replace(" ", "").Replace("\r\n", ""),
+                经典指令 = ReplaceImagePathsInHtml(经典指令!.InnerHtml.Replace("弱", "").Replace("中", "").Replace("強", "")).Replace(" ", "").Replace("\n", " ").Replace("\r", ""),
                 类型 = 类型,
                 发生 = (发生?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
-                持续帧 = (持续帧?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
+                持续帧 = 有无部分持续帧 ? 持续帧.InnerText.Replace(" ", "") : $"{总持续帧.InnerText}({部分持续帧!.InnerText})",
                 后摇 = (后摇?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
                 命中 = (命中?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
                 被防 = (被防?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
@@ -62,7 +75,7 @@ namespace StreetFighter6FrameData
                 反击康斗气槽减少量 = (反击康斗气槽减少量?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
                 大招增加量 = (大招增加量?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
                 属性 = (属性?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
-                备注 = (备注?.InnerText ?? "").Replace(" ", "").Replace("\r\n", "")
+                备注 = 备注
             };
         }
         static public string ReplaceImagePathsInHtml(string html)

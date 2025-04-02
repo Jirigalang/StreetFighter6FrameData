@@ -1,7 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using static System.Console;
 
 namespace StreetFighter6FrameData
 {
@@ -96,7 +95,8 @@ namespace StreetFighter6FrameData
                     .Where(x => x.Node.GetAttributeValue("class", "") == "frame_heading__hh7Ah")
                     .ToList();
 
-                var groups = headingNodes.Select((x, i) => new {
+                var groups = headingNodes.Select((x, i) => new
+                {
                     Category = x.Node.SelectSingleNode(".//span").InnerText,
                     StartIndex = x.Index,
                     EndIndex = (i < headingNodes.Count - 1)
@@ -106,11 +106,11 @@ namespace StreetFighter6FrameData
 
                 foreach (var group in groups)
                 {
-                    if(group.Category =="通常技")
+                    if (group.Category == "通常技")
                     {
                         for (int i = group.StartIndex + 1; i < group.EndIndex; i++)
                         {
-                            commandList.通常技.Add(Move.Pares(tableRows[i],group.Category));
+                            commandList.通常技.Add(Move.Pares(tableRows[i], group.Category));
                         }
                     }
                     if (group.Category == "特殊技")
@@ -149,7 +149,11 @@ namespace StreetFighter6FrameData
                         }
                     }
                 }
-                File.WriteAllText("json/"+Path.GetFileNameWithoutExtension(filename)+".json", JsonSerializer.Serialize(commandList, _jsonOptions));
+                if (!Directory.Exists("json"))
+                {
+                    Directory.CreateDirectory("json");
+                }
+                File.WriteAllText("json/" + Path.GetFileNameWithoutExtension(filename) + ".json", JsonSerializer.Serialize(commandList, _jsonOptions));
             }
         }
         /// <summary>
@@ -187,16 +191,14 @@ namespace StreetFighter6FrameData
             foreach (var filename in htmlFiles)
             {
                 string text = File.ReadAllText(filename);
-                var a = JsonSerializer.Deserialize<List<Move>>(text);
-                foreach (var obj in a!)
-                {
-                    names.Add(new Name { BaseName = obj.招式名, 别名 = [] });
-                }
-                if (!Path.Exists("Alias"))
+                var a = JsonSerializer.Deserialize<CommandList>(text);
+
+                names.Add(new Name { BaseName = Path.GetFileNameWithoutExtension(filename), 别名 = [] });
+                if (!Directory.Exists("Alias"))
                 {
                     Directory.CreateDirectory("Alias");
                 }
-                File.WriteAllText(Path.Combine("Alias", Path.GetFileName(filename.Replace("json", "Alias.json"))), JsonSerializer.Serialize(names, config));
+                File.WriteAllText(Path.Combine("Alias", "Alias.json"), JsonSerializer.Serialize(names, config));
 
             }
         }
