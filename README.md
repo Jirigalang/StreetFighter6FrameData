@@ -1,1 +1,2 @@
 # StreetFighter6FrameData
+没完成的可能只有翻译的工作了,试过机器翻译,效果不是很理想
