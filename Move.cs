@@ -36,7 +36,8 @@ namespace StreetFighter6FrameData
             bool 有无部分持续帧 = 部分持续帧 is null;
             var 后摇 = link.SelectSingleNode(".//td[@class='frame_recovery_frame__CznJj']");
             var 命中 = link.SelectSingleNode(".//td[@class='frame_hit_frame__K7xOz undefined']");
-            var 被防 = link.SelectSingleNode(".//td[@class='frame_block_frame__SfHiW undefined']");
+            var 被防 = link.SelectSingleNode(".//td[@class='frame_block_frame__SfHiW undefined']")
+                ?? link.SelectSingleNode(".//td[@class='frame_block_frame__SfHiW ']");
             var 取消类型 = link.SelectSingleNode(".//td[@class='frame_cancel__hT_hr']");
             var 伤害 = link.SelectSingleNode(".//td[@class='frame_damage__HWaQm']");
             var 连招修正 = link.SelectSingleNode(".//td[@class='frame_combo_correct__hCDUB']");
@@ -63,7 +64,7 @@ namespace StreetFighter6FrameData
                 经典指令 = ReplaceImagePathsInHtml(经典指令!.InnerHtml.Replace("弱", "").Replace("中", "").Replace("強", "")).Replace(" ", "").Replace("\n", " ").Replace("\r", ""),
                 类型 = 类型,
                 发生 = (发生?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
-                持续帧 = 有无部分持续帧 ? 持续帧.InnerText.Replace(" ", "") : $"{总持续帧.InnerText}({部分持续帧!.InnerText})",
+                持续帧 = 有无部分持续帧 ? 持续帧.InnerText.Replace(" ", "") : $"{总持续帧.InnerText}({部分持续帧!.InnerText.Replace("\r\n", "")})",
                 后摇 = (后摇?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
                 命中 = (命中?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),
                 被防 = (被防?.InnerText ?? "").Replace(" ", "").Replace("\r\n", ""),

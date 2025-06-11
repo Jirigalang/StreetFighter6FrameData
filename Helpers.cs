@@ -1,11 +1,17 @@
 ﻿using HtmlAgilityPack;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace StreetFighter6FrameData
 {
     public static class Helpers
     {
+        // 缓存JSON Serializer选项实例，以避免为每个序列化操作创建新的实例。
+        private static readonly JsonSerializerOptions CachedJsonOptions = new()
+        {
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
         /// <summary>
         /// 爬虫准备
         /// </summary>
@@ -73,11 +79,6 @@ namespace StreetFighter6FrameData
         /// </summary>
         static public void ParseFrameData()
         {
-            JsonSerializerOptions _jsonOptions = new()
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
             string[] htmlFiles = Directory.GetFiles(
                                  AppDomain.CurrentDomain.BaseDirectory + "/html",
                                  "*.html"
@@ -106,6 +107,8 @@ namespace StreetFighter6FrameData
 
                 foreach (var group in groups)
                 {
+                    if (File.Exists("json/" + Path.GetFileNameWithoutExtension(filename) + ".json"))
+                        continue;
                     if (group.Category == "通常技")
                     {
                         for (int i = group.StartIndex + 1; i < group.EndIndex; i++)
@@ -153,56 +156,55 @@ namespace StreetFighter6FrameData
                 {
                     Directory.CreateDirectory("json");
                 }
-                File.WriteAllText("json/" + Path.GetFileNameWithoutExtension(filename) + ".json", JsonSerializer.Serialize(commandList, _jsonOptions));
+                File.WriteAllText("json/" + Path.GetFileNameWithoutExtension(filename) + ".json", JsonSerializer.Serialize(commandList, CachedJsonOptions));
             }
         }
-        /// <summary>
-        /// 将八方向键的html标签替换为字符
-        /// </summary>
-        /// <param name="html"></param>
-        /// <returns></returns>
-        static public string ReplaceImagePathsInHtml(string html)
-        {
-            foreach (var kvp in Command.NameMap)
-            {
-                string pattern = $@"(<img\s+[^>]*src\s*=\s*[""']){Regex.Escape(kvp.Key)}([""'][^>]*>)";
-                html = Regex.Replace(html, pattern, kvp.Value);
-            }
-            return html;
-        }
+
         /// <summary>
         /// 生成别名文件
         /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="names"></param>
         static public void GenerateAliasFiles()
         {
             List<Name> names = [];
 
-            var config = new JsonSerializerOptions()
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
             string[] htmlFiles = Directory.GetFiles(
                                  Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "json"),
                                  "*.json"
                                 );
             foreach (var filename in htmlFiles)
             {
-                string text = File.ReadAllText(filename);
-                var a = JsonSerializer.Deserialize<CommandList>(text);
-
                 names.Add(new Name { BaseName = Path.GetFileNameWithoutExtension(filename), 别名 = [] });
-                if (!Directory.Exists("Alias"))
-                {
-                    Directory.CreateDirectory("Alias");
-                }
-                File.WriteAllText(Path.Combine("Alias", "Alias.json"), JsonSerializer.Serialize(names, config));
 
             }
-        }
+            if (!Directory.Exists("Alias"))
+            {
+                Directory.CreateDirectory("Alias");
+            }
 
+            string oldAliasFile = "";
+            List<Name> oldNames = [];
+            if (File.Exists(Path.Combine("Alias", "Alias.json")))
+            {
+                oldAliasFile = File.ReadAllText(Path.Combine("Alias", "Alias.json"));
+                oldNames = JsonSerializer.Deserialize<List<Name>>(oldAliasFile) ?? names;
+                if (names.Count != oldNames.Count)
+                {
+                    var newItems = names.Where(n => !oldNames.Any(o => o.BaseName == n.BaseName))
+                                        .ToList();
+                    foreach (var item in newItems)
+                    {
+                        oldNames.Add(item);
+                        Console.WriteLine($"有新增角色{item.BaseName}");
+                    }
+                    File.WriteAllText(Path.Combine("Alias", "Alias.json"), JsonSerializer.Serialize(oldNames, CachedJsonOptions));
+
+                }
+                else
+                    return;
+            }
+            else
+                File.WriteAllText(Path.Combine("Alias", "Alias.json"), JsonSerializer.Serialize(names, CachedJsonOptions));
+        }
     }
     public class Name
     {

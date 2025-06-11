@@ -7,6 +7,48 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+<PropertyGroup>
+  <!-- 基础版本号 -->
+  <MajorVersion>1</MajorVersion>
+  <MinorVersion>0</MinorVersion>
+  
+  <!-- 使用天数作为构建号 (从2000年1月1日开始) -->
+  <DaysSince2000>$([MSBuild]::Divide($([System.DateTime]::Now.Subtract($([System.DateTime]::Parse("2000-01-01"))).TotalDays), 1))</DaysSince2000>
+  <BuildNumber>$([System.Math]::Floor($(DaysSince2000)))</BuildNumber>
+  
+  <!-- 使用自午夜起的秒数除以2作为修订号 -->
+  <RevisionNumber>$([System.Math]::Floor($([System.DateTime]::Now.TimeOfDay.TotalSeconds)))</RevisionNumber>
+  
+  <!-- 组合符合规范的版本号 -->
+  <AssemblyVersion>$(MajorVersion).$(MinorVersion).$(BuildNumber).$(RevisionNumber)</AssemblyVersion>
+  
+  <!-- 显示用的完整版本号 (可以包含更多信息) -->
+  <Version>$(MajorVersion).$(MinorVersion).$([System.DateTime]::Now.ToString("yyMMdd"))</Version>
+  
+  <!-- 确保所有输出都使用带版本的文件名 -->
+  <AssemblyName>$(MSBuildProjectName)-$(Version)</AssemblyName>
+  <TargetFileName>$(AssemblyName)$(TargetExt)</TargetFileName>
+</PropertyGroup>
+
+  <!-- 版本号显示目标 -->
+  <Target Name="DisplayVersion" BeforeTargets="Build">
+    <Message Importance="high" Text="当前版本: $(Version)" />
+  </Target>
+
+  <!-- 确保发布时也使用正确的文件名 -->
+  <Target Name="PostPublish" AfterTargets="Publish">
+    <Message Importance="high" Text="已发布文件到: $(PublishDir)$(TargetFileName)" />
+    <Message Importance="high" Text="发布版本: $(Version)" />
+  </Target>
+
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.0" />
   </ItemGroup>

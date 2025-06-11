@@ -110,6 +110,10 @@ namespace StreetFighter6FrameData
                             count++;
                         }
                     }
+                    if (共通系统.招式名.Contains("ドライブパリィに"))
+                    {
+                        共通系统.招式名.Replace("ドライブパリィに", "蓝防时");
+                    }
 
                 }
                 File.WriteAllText(file, JsonSerializer.Serialize(commandList, _jsonOptions));
