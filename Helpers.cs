@@ -104,11 +104,8 @@ namespace StreetFighter6FrameData
                         ? headingNodes[i + 1].Index
                         : tableRows.Count
                 });
-
                 foreach (var group in groups)
                 {
-                    if (File.Exists("json/" + Path.GetFileNameWithoutExtension(filename) + ".json"))
-                        continue;
                     if (group.Category == "通常技")
                     {
                         for (int i = group.StartIndex + 1; i < group.EndIndex; i++)
